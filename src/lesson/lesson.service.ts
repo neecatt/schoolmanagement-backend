@@ -12,22 +12,28 @@ export class LessonService {
     private lessonRepository: Repository<Lesson>,
   ) {}
 
-  async createLesson(createLessonDto: CreateLessonDto): Promise<Lesson> {
-    const { name, startDate, endDate } = createLessonDto;
+  async create(createLessonDto: CreateLessonDto): Promise<Lesson> {
     const lesson = this.lessonRepository.create({
       id: uuid(),
-      name,
-      startDate,
-      endDate,
+      ...createLessonDto,
     });
     return await this.lessonRepository.save(lesson);
   }
 
-  async getLesson(id: string): Promise<Lesson> {
+  async findOneById(id: string): Promise<Lesson> {
     return await this.lessonRepository.findOneBy({ id });
   }
 
   async findAll(): Promise<Lesson[]> {
     return await this.lessonRepository.find();
+  }
+
+  async assignStudentsToLesson(
+    lessonId: string,
+    studentIds: string[],
+  ): Promise<Lesson> {
+    const lesson = await this.findOneById(lessonId);
+    lesson.students = [...lesson.students, ...studentIds];
+    return await this.lessonRepository.save(lesson);
   }
 }
